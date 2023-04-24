@@ -11,7 +11,7 @@ const registerUser = async (req, res) => {
 
   let user = await User.findOne({ email: req.body.email });
 
-  if (user) return res.status(400).send("User already exosts.");
+  if (user) return res.status(400).send("User already exists.");
 
   user = new User({
     email: req.body.email,
@@ -25,11 +25,14 @@ const registerUser = async (req, res) => {
 
   const token = user.generateAuthToken();
 
-  res.header("x-auth-token", token).send({
-    id: user._id,
-    email: user.email,
-    password: user.password,
-  });
+  res
+    .header("x-auth-token", token)
+    .header("access-control-expose-headers", "x-auth-token")
+    .send({
+      id: user._id,
+      email: user.email,
+      password: user.password,
+    });
 };
 
 // @desc    Login a user
