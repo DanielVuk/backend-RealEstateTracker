@@ -14,6 +14,7 @@ const registerUser = async (req, res) => {
   if (user) return res.status(400).send("User already exists.");
 
   user = new User({
+    name: req.body.name,
     email: req.body.email,
     password: req.body.password,
   });
@@ -30,6 +31,7 @@ const registerUser = async (req, res) => {
     .header("access-control-expose-headers", "x-auth-token")
     .send({
       id: user._id,
+      name: user.name,
       email: user.email,
       password: user.password,
     });
@@ -39,7 +41,7 @@ const registerUser = async (req, res) => {
 // @route   POST /api/users/login
 // @access  Public
 const loginUser = async (req, res) => {
-  const { error } = validateUser(req.body);
+  const { error } = validateUser(req.body, "login");
 
   if (error) return res.status(400).send(error.details[0].message);
 
