@@ -96,36 +96,55 @@ const deleteProperty = async (req, res) => {
 // @desc:   Update property
 // @route   PUT /api/properties/:id
 // @access  Private
-const updatePropery = async (req, res) => {
+const updateProperty = async (req, res) => {
+  const { id } = req.params;
+  const {
+    type,
+    location,
+    area,
+    price,
+    purchaseDate,
+    imageUrls,
+    owners,
+    contacts,
+    description,
+  } = req.body;
+
+  console.log(
+    "DOBIVRNI PARAMETRI: ",
+    type,
+    location,
+    area,
+    price,
+    purchaseDate,
+    imageUrls,
+    owners,
+    contacts,
+    description
+  );
+
   try {
-    const property = await Property.findById(req.params.id);
-    console.log("PROPERTY: ", property);
+    const property = await Property.findById(id);
+
     if (!property) {
-      res.status(400);
-      throw new Error("Property not found.");
-    }
-    const user = await User.findById(req.user._id);
-    console.log("TU SAM 1");
-    if (!user) {
-      res.status(401);
-      throw new Error("User not found.");
+      return res.status(404).json({ message: "Property not found" });
     }
 
-    if (property.user.toString() !== req.user._id) {
-      return res
-        .status(403)
-        .json({ error: "Unauthorized: You don't own this property" });
-    }
-    // const updatedProperty = await Property.findByIdAndUpdate(
-    //   req.params.id,
-    //   req.body,
-    //   { new: true }
-    // );
-    // res.status(200).json(updatedProperty);
-    res.status(200).send("Updatan property");
-    console.log("TU SAM 4");
+    property.type = type;
+    property.location = location;
+    property.area = area;
+    property.price = price;
+    property.purchaseDate = purchaseDate;
+    property.imageUrls = imageUrls;
+    property.owners = owners;
+    property.contacts = contacts;
+    property.description = description;
+
+    await property.save();
+    res.status(200).json(property);
   } catch (error) {
-    res.status(500).send("Something failed with updating.");
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -134,5 +153,5 @@ module.exports = {
   getProperties,
   getPropertyById,
   deleteProperty,
-  updatePropery,
+  updateProperty,
 };
