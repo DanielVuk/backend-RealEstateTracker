@@ -40,6 +40,27 @@ const getPropertyById = async (req, res) => {
   }
 };
 
+// @desc:   Get user paginated properties
+// @route   GET /api/properties/paginated-properties
+// @access  Private
+const getPropertiesWithPagination = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const itemsPerPage = parseInt(req.query.itemsPerPage) || 5;
+    const startIndex = (page - 1) * itemsPerPage;
+
+    const properties = await Property.find()
+      .skip(startIndex)
+      .limit(itemsPerPage);
+    const totalProperties = await Property.countDocuments();
+
+    res.status(200).json({ properties, totalProperties });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: error.message });
+  }
+};
+
 // @desc:   Create a new property
 // @route   POST /api/properties
 // @access  Public
@@ -154,4 +175,5 @@ module.exports = {
   getPropertyById,
   deleteProperty,
   updateProperty,
+  getPropertiesWithPagination,
 };

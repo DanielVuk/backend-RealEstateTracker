@@ -6,11 +6,13 @@ const {
   deleteProperty,
   updateProperty,
   getPropertyById,
+  getPropertiesWithPagination,
 } = require("../controllers/propertyController.js");
 
 const { auth } = require("../middleware/auth.js");
 
 router.route("/").post(auth, createProperty).get(auth, getProperties);
+router.route("/paginated-properties").get(auth, getPropertiesWithPagination);
 
 router
   .route("/:id")
