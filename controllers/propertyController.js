@@ -1,4 +1,3 @@
-const { raw } = require("express");
 const { Property } = require("../models/property");
 const { User } = require("../models/user");
 
@@ -119,55 +118,64 @@ const deleteProperty = async (req, res) => {
 // @access  Private
 const updateProperty = async (req, res) => {
   const { id } = req.params;
-  const {
-    type,
-    location,
-    area,
-    price,
-    purchaseDate,
-    imageUrls,
-    owners,
-    contacts,
-    description,
-  } = req.body;
-
-  console.log(
-    "DOBIVRNI PARAMETRI: ",
-    type,
-    location,
-    area,
-    price,
-    purchaseDate,
-    imageUrls,
-    owners,
-    contacts,
-    description
-  );
-
+  const updateFields = req.body;
+  console.log("POLJA ZA UPDATATI: ", updateFields);
   try {
-    const property = await Property.findById(id);
+    const updatedProperty = await Property.findByIdAndUpdate(id, updateFields, {
+      new: true,
+    });
 
-    if (!property) {
+    if (!updatedProperty) {
       return res.status(404).json({ message: "Property not found" });
     }
 
-    property.type = type;
-    property.location = location;
-    property.area = area;
-    property.price = price;
-    property.purchaseDate = purchaseDate;
-    property.imageUrls = imageUrls;
-    property.owners = owners;
-    property.contacts = contacts;
-    property.description = description;
-
-    await property.save();
-    res.status(200).json(property);
+    res.status(200).json(updatedProperty);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+// const updateProperty = async (req, res) => {
+//   const { id } = req.params;
+//   const {
+//     type,
+//     location,
+//     area,
+//     price,
+//     purchaseDate,
+//     imageUrls,
+//     owners,
+//     contacts,
+//     projects,
+//     description,
+//   } = req.body;
+
+//   try {
+//     const property = await Property.findById(id);
+
+//     if (!property) {
+//       return res.status(404).json({ message: "Property not found" });
+//     }
+
+//     property.type = type;
+//     property.location = location;
+//     property.area = area;
+//     property.price = price;
+//     property.purchaseDate = purchaseDate;
+//     property.imageUrls = imageUrls;
+//     property.owners = owners;
+//     property.contacts = contacts;
+//     property.projects = projects
+//     property.description = description;
+
+//     await property.save();
+//     res.status(200).json(property);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
 
 module.exports = {
   createProperty,
