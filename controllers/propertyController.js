@@ -44,18 +44,40 @@ const getPropertyById = async (req, res) => {
 // @access  Private
 const getPropertiesWithPagination = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const itemsPerPage = parseInt(req.query.itemsPerPage) || 5;
-    const startIndex = (page - 1) * itemsPerPage;
+    const { page, itemsPerPage, type, minPrice, maxPrice, minArea, maxArea } =
+      req.query;
 
-    const properties = await Property.find()
+    const filter = { user: req.user._id };
+
+    if (type) {
+      filter.type = type;
+    }
+    if (minPrice) {
+      filter.price = { $gte: parseInt(minPrice) };
+    }
+    if (maxPrice) {
+      filter.price = { ...filter.price, $lte: parseInt(maxPrice) };
+    }
+    if (minArea) {
+      filter.area = { $gte: parseInt(minArea) };
+    }
+    if (maxArea) {
+      filter.area = { ...filter.area, $lte: parseInt(maxArea) };
+    }
+
+    const startIndex = (page - 1) * itemsPerPage;
+    const filteredAndPaginatedProperties = await Property.find(filter)
       .skip(startIndex)
       .limit(itemsPerPage);
-    const totalProperties = await Property.countDocuments();
 
-    res.status(200).json({ properties, totalProperties });
+    const totalFilteredProperties = await Property.countDocuments(filter);
+
+    res.status(200).json({
+      properties: filteredAndPaginatedProperties,
+      totalProperties: totalFilteredProperties,
+    });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).send({ message: error.message });
   }
 };
@@ -135,47 +157,6 @@ const updateProperty = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-// const updateProperty = async (req, res) => {
-//   const { id } = req.params;
-//   const {
-//     type,
-//     location,
-//     area,
-//     price,
-//     purchaseDate,
-//     imageUrls,
-//     owners,
-//     contacts,
-//     projects,
-//     description,
-//   } = req.body;
-
-//   try {
-//     const property = await Property.findById(id);
-
-//     if (!property) {
-//       return res.status(404).json({ message: "Property not found" });
-//     }
-
-//     property.type = type;
-//     property.location = location;
-//     property.area = area;
-//     property.price = price;
-//     property.purchaseDate = purchaseDate;
-//     property.imageUrls = imageUrls;
-//     property.owners = owners;
-//     property.contacts = contacts;
-//     property.projects = projects
-//     property.description = description;
-
-//     await property.save();
-//     res.status(200).json(property);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Internal Server Error" });
-//   }
-// };
 
 module.exports = {
   createProperty,
