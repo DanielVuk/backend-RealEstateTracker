@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Joi = require("joi");
 
 const ownerSchema = new mongoose.Schema(
   {
@@ -61,4 +62,55 @@ const propertySchema = new mongoose.Schema({
 
 const Property = mongoose.model("Property", propertySchema);
 
-module.exports = { Property };
+const validateProperty = (property) => {
+  const schema = Joi.object({
+    type: Joi.string().required(),
+    location: Joi.object({
+      city: Joi.string().required(),
+      street: Joi.string().required(),
+      zip: Joi.string().required(),
+    }),
+    area: Joi.number().min(0).required(),
+    price: Joi.number().min(0).required(),
+    purchaseDate: Joi.date().default(Date.now),
+    imageUrls: Joi.array().items(Joi.string()),
+    owners: Joi.array()
+      .items(
+        Joi.object({
+          name: Joi.string().required(),
+          share: Joi.number().min(0).max(100).required(),
+        })
+      )
+      .optional(),
+    contacts: Joi.array()
+      .items(
+        Joi.object({
+          name: Joi.string().required(),
+          number: Joi.string().required(),
+        })
+      )
+      .optional(),
+    description: Joi.string().allow(""),
+    projects: Joi.array().items(
+      Joi.object({
+        name: Joi.string().required(),
+        status: Joi.string()
+          .valid("in progress", "completed")
+          .default("in progress"),
+        createdDate: Joi.date().default(Date.now),
+        transactions: Joi.array().items(
+          Joi.object({
+            type: Joi.string().valid("income", "expense").required(),
+            date: Joi.date().default(Date.now),
+            description: Joi.string().required(),
+            amount: Joi.number().required(),
+          })
+        ),
+      })
+    ),
+  });
+
+  return schema.validate(property);
+};
+
+module.exports = { Property, validateProperty };

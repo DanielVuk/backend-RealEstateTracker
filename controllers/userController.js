@@ -19,8 +19,7 @@ const registerUser = async (req, res) => {
     password: req.body.password,
   });
 
-  const salt = await bcrypt.genSalt(10);
-  user.password = await bcrypt.hash(user.password, salt);
+  user.password = await bcrypt.hash(user.password, 10);
 
   await user.save();
 
@@ -42,7 +41,6 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
   const { error } = validateUser(req.body, "login");
-
   if (error) return res.status(400).send(error.details[0].message);
 
   let user = await User.findOne({ email: req.body.email });
@@ -51,7 +49,7 @@ const loginUser = async (req, res) => {
 
   const validPassowrd = await bcrypt.compare(req.body.password, user.password);
 
-  if (!validPassowrd) return res.status(400).send("Invalid email or password.");
+  if (!validPassowrd) return res.status(400).send("Invalid credentials.");
 
   const token = user.generateAuthToken();
 
