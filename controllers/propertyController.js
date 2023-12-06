@@ -1,6 +1,5 @@
 const { Property, validateProperty } = require("../models/property");
 const { User } = require("../models/user");
-
 // @desc:   Get user properties
 // @route   GET /api/properties
 // @access  Private
